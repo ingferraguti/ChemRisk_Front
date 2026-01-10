@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  postLogin,
+  postVerifyToken,
+  type LoginRequest,
+  type LoginResponse,
+} from "@/generated/api";
 
 const TOKEN_KEY = "chemrisk_token";
 
@@ -24,18 +28,14 @@ export function clearToken() {
   window.localStorage.removeItem(TOKEN_KEY);
 }
 
-export function useAuthGuard() {
-  const router = useRouter();
-  const [ready, setReady] = useState(false);
+export async function login(payload: LoginRequest): Promise<LoginResponse> {
+  return postLogin(payload);
+}
 
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-    setReady(true);
-  }, [router]);
+export function logout() {
+  clearToken();
+}
 
-  return ready;
+export async function verifyToken(token: string) {
+  return postVerifyToken({ token });
 }
