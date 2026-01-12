@@ -38,7 +38,13 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
           ? list.items
           : Array.isArray(list.results)
             ? list.results
-            : [];
+            : Array.isArray(list.users)
+              ? list.users
+              : Array.isArray(list.user)
+                ? list.user
+                : Array.isArray(list.list)
+                  ? list.list
+                  : [];
 
     if (!search || entity.list.searchMode === "server") {
       return normalized as Array<Record<string, unknown>>;
