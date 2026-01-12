@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getEntity } from "@/features/_config/entities";
 import type { EntityConfig } from "./types";
+import { normalizeListResponse } from "./data/normalizeListResponse";
+import type { NormalizedListResponse } from "./data/normalizeListResponse";
 
 export function useEntityList<TList, TItem, TCreate, TUpdate>(
   entityKey: string,
@@ -11,7 +13,7 @@ export function useEntityList<TList, TItem, TCreate, TUpdate>(
     throw new Error(`Entity ${entityKey} not found`);
   }
 
-  const query = useQuery({
+  const query = useQuery<TList, Error, NormalizedListResponse<TItem>>({
     queryKey: [entityKey, "list", params],
     queryFn: async () => {
       if (params?.search && entity.serverSearch && entity.list.searchMode === "server") {
@@ -19,6 +21,11 @@ export function useEntityList<TList, TItem, TCreate, TUpdate>(
       }
       return entity.api.list();
     },
+    select: (raw) =>
+      normalizeListResponse(entityKey, raw, {
+        debug: true,
+        acceptSingleObjectAsItem: false,
+      }),
   });
 
   return query;

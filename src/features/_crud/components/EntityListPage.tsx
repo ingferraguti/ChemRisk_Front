@@ -29,36 +29,8 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
   });
 
   const items = useMemo(() => {
-    if (!data) {
-      return [] as Array<Record<string, unknown>>;
-    }
-    const list =
-      Array.isArray(data)
-        ? data
-        : (data as {
-            data?: unknown;
-            items?: unknown;
-            results?: unknown;
-            users?: unknown;
-            user?: unknown;
-            list?: unknown;
-          });
-    const normalized = Array.isArray(list)
-      ? list
-      : Array.isArray(list.data)
-        ? list.data
-        : Array.isArray(list.items)
-          ? list.items
-          : Array.isArray(list.results)
-            ? list.results
-            : Array.isArray(list.users)
-              ? list.users
-              : Array.isArray(list.user)
-                ? list.user
-                : Array.isArray(list.list)
-                  ? list.list
-                  : [];
-    const withIds = (normalized as Array<Record<string, unknown>>).map((item) => {
+    const normalized = (data?.items ?? []) as Array<Record<string, unknown>>;
+    const withIds = normalized.map((item) => {
       if ("id" in item && item.id != null) {
         return item;
       }
@@ -91,13 +63,8 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
     }
   }, [error]);
 
- console.log("EntityListPage entityKey", entityKey);
-console.log("useEntityList data", data);
-console.log("items.length", items.length);
-console.log("items[0]", items[0]);
-console.log("columns keys", entity.list.columns.map(c => String(c.key)));
-console.log("idField", entity.idField);
-
+  const showDebugMeta = process.env.NODE_ENV !== "production" && data?.meta;
+  const warningsCount = data?.warnings?.length ?? 0;
 
   return (
     <div className="space-y-4">
@@ -120,6 +87,14 @@ console.log("idField", entity.idField);
           onChange={(event) => setSearch(event.target.value)}
           className="max-w-sm"
         />
+      )}
+      {showDebugMeta && (
+        <div className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
+          <div>
+            entityKey={data.meta.entityKey} pattern={data.meta.pattern} rawType=
+            {data.meta.rawType} itemsLen={data.meta.length} warningsCount={warningsCount}
+          </div>
+        </div>
       )}
       {isLoading ? (
         <TableSkeleton />
