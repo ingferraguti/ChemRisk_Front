@@ -7,7 +7,7 @@ import { getEntity } from "@/features/_config/entities";
 import { useEntityList } from "../hooks";
 import { DataTable } from "./DataTable";
 import { TableSkeleton } from "./TableSkeleton";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
@@ -72,9 +72,12 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
           <h1 className="text-2xl font-semibold">{entity.label}</h1>
           <p className="text-sm text-muted-foreground">Gestisci {entity.label.toLowerCase()}.</p>
         </div>
-        <Button asChild>
-          <Link href={`${entity.routes.base}/new`}>Nuovo</Link>
-        </Button>
+        <Link
+          href={`${entity.routes.base}/new`}
+          className={buttonVariants({ variant: "default" })}
+        >
+          Nuovo
+        </Link>
       </div>
       {entity.list.enableSearch && (
         <Input
