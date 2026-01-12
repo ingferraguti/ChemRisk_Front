@@ -16,6 +16,10 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    setSearch("");
+  }, [entityKey]);
+
   if (!entity) {
     return <div>Entity non trovata.</div>;
   }
@@ -75,7 +79,8 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
     return (withIds as Array<Record<string, unknown>>).filter((item) =>
       entity.list.columns.some((column) => {
         const value = item[String(column.key)];
-        return typeof value === "string" && value.toLowerCase().includes(normalizedSearch);
+        const normalizedValue = String(value ?? "").toLowerCase();
+        return normalizedValue.includes(normalizedSearch);
       })
     );
   }, [data, search, entity.list.columns, entity.list.searchMode]);
@@ -86,7 +91,12 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
     }
   }, [error]);
 
- 
+ console.log("EntityListPage entityKey", entityKey);
+console.log("useEntityList data", data);
+console.log("items.length", items.length);
+console.log("items[0]", items[0]);
+console.log("columns keys", entity.list.columns.map(c => String(c.key)));
+console.log("idField", entity.idField);
 
 
   return (
