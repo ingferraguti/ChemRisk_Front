@@ -29,7 +29,16 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
       return [] as Array<Record<string, unknown>>;
     }
     const list =
-      Array.isArray(data) ? data : (data as { data?: unknown; items?: unknown; results?: unknown });
+      Array.isArray(data)
+        ? data
+        : (data as {
+            data?: unknown;
+            items?: unknown;
+            results?: unknown;
+            users?: unknown;
+            user?: unknown;
+            list?: unknown;
+          });
     const normalized = Array.isArray(list)
       ? list
       : Array.isArray(list.data)
@@ -45,13 +54,25 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
                 : Array.isArray(list.list)
                   ? list.list
                   : [];
+    const withIds = (normalized as Array<Record<string, unknown>>).map((item) => {
+      if ("id" in item && item.id != null) {
+        return item;
+      }
+      if ("_id" in item && item._id != null) {
+        return { ...item, id: item._id };
+      }
+      if ("Codice" in item && item.Codice != null) {
+        return { ...item, id: item.Codice };
+      }
+      return item;
+    });
 
     if (!search || entity.list.searchMode === "server") {
-      return normalized as Array<Record<string, unknown>>;
+      return withIds as Array<Record<string, unknown>>;
     }
 
     const normalizedSearch = search.toLowerCase();
-    return (normalized as Array<Record<string, unknown>>).filter((item) =>
+    return (withIds as Array<Record<string, unknown>>).filter((item) =>
       entity.list.columns.some((column) => {
         const value = item[String(column.key)];
         return typeof value === "string" && value.toLowerCase().includes(normalizedSearch);
@@ -64,6 +85,9 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
       toast.error(error.message);
     }
   }, [error]);
+
+ 
+
 
   return (
     <div className="space-y-4">
