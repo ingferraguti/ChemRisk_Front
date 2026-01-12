@@ -42,7 +42,11 @@ const resolveRequestPath = (url: string) => {
 export function getBaseUrl(): string {
   const envBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (envBaseUrl && envBaseUrl.trim().length > 0) {
-    return envBaseUrl;
+    const trimmed = envBaseUrl.trim();
+    if (typeof window !== "undefined" && isAbsoluteUrl(trimmed)) {
+      return DEFAULT_BASE_URL;
+    }
+    return trimmed;
   }
   return DEFAULT_BASE_URL;
 }
