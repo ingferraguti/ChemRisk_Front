@@ -28,15 +28,27 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
     if (!data) {
       return [] as Array<Record<string, unknown>>;
     }
+    const list =
+      Array.isArray(data) ? data : (data as { data?: unknown; items?: unknown; results?: unknown });
+    const normalized = Array.isArray(list)
+      ? list
+      : Array.isArray(list.data)
+        ? list.data
+        : Array.isArray(list.items)
+          ? list.items
+          : Array.isArray(list.results)
+            ? list.results
+            : [];
+
     if (!search || entity.list.searchMode === "server") {
-      return data as Array<Record<string, unknown>>;
+      return normalized as Array<Record<string, unknown>>;
     }
 
-    const normalized = search.toLowerCase();
-    return (data as Array<Record<string, unknown>>).filter((item) =>
+    const normalizedSearch = search.toLowerCase();
+    return (normalized as Array<Record<string, unknown>>).filter((item) =>
       entity.list.columns.some((column) => {
         const value = item[String(column.key)];
-        return typeof value === "string" && value.toLowerCase().includes(normalized);
+        return typeof value === "string" && value.toLowerCase().includes(normalizedSearch);
       })
     );
   }, [data, search, entity.list.columns, entity.list.searchMode]);
