@@ -10,11 +10,15 @@ import { TableSkeleton } from "./TableSkeleton";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { getRoles } from "@/lib/auth";
 
 export function EntityListPage({ entityKey }: { entityKey: string }) {
   const entity = getEntity(entityKey);
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const roles = getRoles();
+  const isAdmin = roles.some((role) => role.toLowerCase() === "admin");
+  const adminOnlyKeys = new Set(["frasih", "usersAdmin", "userBase"]);
 
   useEffect(() => {
     setSearch("");
@@ -22,6 +26,9 @@ export function EntityListPage({ entityKey }: { entityKey: string }) {
 
   if (!entity) {
     return <div>Entity non trovata.</div>;
+  }
+  if (adminOnlyKeys.has(entity.key) && !isAdmin) {
+    return <div>Accesso riservato agli amministratori.</div>;
   }
 
   const { data, isLoading, error } = useEntityList(entityKey, {

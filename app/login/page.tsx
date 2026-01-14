@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { postLogin, type LoginRequest } from "@/generated/api";
-import { setToken } from "@/lib/auth";
+import { setRoles, setToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ export default function LoginPage() {
     try {
       const response = await postLogin(values);
       setToken(response.token);
+      setRoles(response.roles ?? []);
       toast.success("Accesso effettuato");
       router.replace("/app");
     } catch (error) {

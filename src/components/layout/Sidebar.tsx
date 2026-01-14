@@ -4,14 +4,26 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ENTITIES } from "@/features/_config/entities";
 import { Button } from "@/components/ui/button";
-import { clearToken } from "@/lib/auth";
+import { clearToken, getRoles } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const items = ENTITIES.filter((entity) => !entity.hideInSidebar);
+  const roles = getRoles();
+  const isAdmin = roles.some((role) => role.toLowerCase() === "admin");
+  const adminOnlyKeys = new Set(["frasih", "usersAdmin", "userBase"]);
+
+  const items = ENTITIES.filter((entity) => {
+    if (entity.hideInSidebar) {
+      return false;
+    }
+    if (adminOnlyKeys.has(entity.key)) {
+      return isAdmin;
+    }
+    return true;
+  });
 
   return (
     <aside className="w-64 border-r bg-background p-4">
