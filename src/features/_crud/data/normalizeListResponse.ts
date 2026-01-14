@@ -23,6 +23,13 @@ const MAX_STRING_PREVIEW = 1200;
 const MAX_KEYS_PREVIEW = 12;
 const MAX_SAMPLE_KEYS = 4;
 
+const isDevSuperVerboseMode = (): boolean => {
+  if (typeof process === "undefined") {
+    return false;
+  }
+  return process.env.dev_super_verbose_mode === "true";
+};
+
 const getRawType = (raw: unknown): string => {
   if (raw === null) {
     return "null";
@@ -86,7 +93,7 @@ const logNormalization = (
   rawPreview: any,
   debug?: boolean
 ) => {
-  if (!debug || typeof console === "undefined") {
+  if (!debug || !isDevSuperVerboseMode() || typeof console === "undefined") {
     return;
   }
   const keysPreview = meta.keys ? meta.keys.slice(0, MAX_KEYS_PREVIEW).join(",") : "null";
