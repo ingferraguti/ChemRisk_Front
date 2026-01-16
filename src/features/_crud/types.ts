@@ -37,6 +37,10 @@ export type ColumnConfig<TItem> = {
   render?: (item: TItem) => ReactNode;
 };
 
+export type EntityRequestContext = {
+  parentId?: number;
+};
+
 export type EntityConfig<TList, TItem, TCreate, TUpdate> = {
   key: string;
   label: string;
@@ -53,12 +57,24 @@ export type EntityConfig<TList, TItem, TCreate, TUpdate> = {
     fields: FieldConfig[];
   };
   api: {
-    list: () => Promise<TList>;
+    list: (context?: EntityRequestContext) => Promise<TList>;
     get: (id: number) => Promise<TItem>;
-    create: (payload: TCreate) => Promise<TItem>;
+    create: (payload: TCreate, context?: EntityRequestContext) => Promise<TItem>;
     update: (id: number, payload: TUpdate) => Promise<TItem>;
     remove: (id: number) => Promise<boolean>;
   };
   serverSearch?: (query: string) => Promise<TList>;
   hideInSidebar?: boolean;
+  requiresAdmin?: boolean;
+  readOnly?: boolean | ((roles: string[]) => boolean);
+  parent?: {
+    param: string;
+    label: string;
+    routeBase?: string;
+  };
+  children?: Array<{
+    label: string;
+    routeBase: string;
+    param: string;
+  }>;
 };

@@ -13,13 +13,11 @@ export function Sidebar() {
 
   const roles = getRoles();
   const isAdmin = roles.some((role) => role.toLowerCase() === "admin");
-  const adminOnlyKeys = new Set(["frasih", "usersAdmin", "userBase"]);
-
   const items = ENTITIES.filter((entity) => {
     if (entity.hideInSidebar) {
       return false;
     }
-    if (adminOnlyKeys.has(entity.key)) {
+    if (entity.requiresAdmin) {
       return isAdmin;
     }
     return true;
@@ -32,6 +30,17 @@ export function Sidebar() {
         <p className="text-xs text-muted-foreground">MVP Dashboard</p>
       </div>
       <nav className="space-y-1">
+        <Link
+          href="/app/profile"
+          className={cn(
+            "block rounded-md px-3 py-2 text-sm font-medium",
+            pathname === "/app/profile"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted"
+          )}
+        >
+          Profilo
+        </Link>
         {items.map((entity) => (
           <Link
             key={entity.key}

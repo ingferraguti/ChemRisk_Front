@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { postLogin, type LoginRequest } from "@/generated/api";
+import { postAuthLogin, type LoginRequest } from "@/generated/api";
 import { setRoles, setToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,9 +29,9 @@ export default function LoginPage() {
 
   const onSubmit = async (values: LoginRequest) => {
     try {
-      const response = await postLogin(values);
-      setToken(response.token);
-      setRoles(response.roles ?? []);
+      const response = await postAuthLogin(values);
+      setToken(response.accessToken);
+      setRoles(response.user.roles ?? []);
       toast.success("Accesso effettuato");
       router.replace("/app");
     } catch (error) {

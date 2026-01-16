@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getEntity } from "@/features/_config/entities";
-import type { EntityConfig } from "./types";
+import type { EntityConfig, EntityRequestContext } from "./types";
 import { normalizeListResponse } from "./data/normalizeListResponse";
 import type { NormalizedListResponse } from "./data/normalizeListResponse";
 
 export function useEntityList<TList, TItem, TCreate, TUpdate>(
   entityKey: string,
-  params?: { search?: string }
+  params?: { search?: string; context?: EntityRequestContext }
 ) {
   const entity = getEntity(entityKey) as EntityConfig<TList, TItem, TCreate, TUpdate>;
   if (!entity) {
@@ -19,7 +19,7 @@ export function useEntityList<TList, TItem, TCreate, TUpdate>(
       if (params?.search && entity.serverSearch && entity.list.searchMode === "server") {
         return entity.serverSearch(params.search);
       }
-      return entity.api.list();
+      return entity.api.list(params?.context);
     },
     select: (raw) =>
       normalizeListResponse(entityKey, raw, {
@@ -44,7 +44,10 @@ export function useEntity<TList, TItem, TCreate, TUpdate>(entityKey: string, id:
   });
 }
 
-export function useCreateEntity<TList, TItem, TCreate, TUpdate>(entityKey: string) {
+export function useCreateEntity<TList, TItem, TCreate, TUpdate>(
+  entityKey: string,
+  context?: EntityRequestContext
+) {
   const queryClient = useQueryClient();
   const entity = getEntity(entityKey) as EntityConfig<TList, TItem, TCreate, TUpdate>;
   if (!entity) {
@@ -52,7 +55,7 @@ export function useCreateEntity<TList, TItem, TCreate, TUpdate>(entityKey: strin
   }
 
   return useMutation({
-    mutationFn: (payload: TCreate) => entity.api.create(payload),
+    mutationFn: (payload: TCreate) => entity.api.create(payload, context),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [entityKey, "list"] });
     },

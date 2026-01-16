@@ -1,17 +1,17 @@
-import { getToken } from "./auth";
+import { clearToken, getToken } from "./auth";
 
 /**
  * HTTP helper used by generated OpenAPI clients.
  *
  * Example .env.local:
- *   NEXT_PUBLIC_API_BASE_URL=https://example.com/api/action.php
+ *   NEXT_PUBLIC_API_BASE_URL=https://example.com/api
  *
  * Note: storing the token in localStorage is an MVP choice. For SSR,
  * move auth to secure httpOnly cookies.
  */
-const DEFAULT_BASE_URL = "/api/action.php";
+const DEFAULT_BASE_URL = "/api";
 
-const AUTH_FREE_PATHS = new Set(["/login", "/verifyToken"]);
+const AUTH_FREE_PATHS = new Set(["/auth/login"]);
 
 const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
 
@@ -51,6 +51,20 @@ export function getBaseUrl(): string {
   return DEFAULT_BASE_URL;
 }
 
+export class HttpError extends Error {
+  status: number;
+  code?: string;
+  details?: unknown;
+
+  constructor(message: string, status: number, code?: string, details?: unknown) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
 export async function customFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   const baseUrl = getBaseUrl();
   const fullUrl = isAbsoluteUrl(url) ? url : joinBaseAndPath(baseUrl, url);
@@ -75,17 +89,36 @@ export async function customFetch<T>(url: string, options: RequestInit = {}): Pr
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    let message = errorText || `HTTP ${response.status}`;
-    try {
+    let message = `HTTP ${response.status}`;
+    let code: string | undefined;
+    let details: unknown;
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const parsed = (await response.json()) as { message?: string; error?: string; code?: string; details?: unknown };
+      message = parsed.message ?? parsed.error ?? message;
+      code = parsed.code;
+      details = parsed.details;
+    } else {
+      const errorText = await response.text();
       if (errorText) {
-        const parsed = JSON.parse(errorText) as { message?: string; error?: string };
-        message = parsed.message ?? parsed.error ?? message;
+        message = errorText;
       }
-    } catch {
-      // Keep text message fallback.
     }
-    throw new Error(message);
+
+    if (response.status === 401) {
+      clearToken();
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+    }
+    if (response.status === 403) {
+      message = "Non autorizzato";
+    }
+    if (response.status === 404) {
+      message = "Risorsa non trovata";
+    }
+
+    throw new HttpError(message, response.status, code, details);
   }
 
   if (response.status === 204) {

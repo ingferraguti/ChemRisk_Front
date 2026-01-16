@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getEntity } from "@/features/_config/entities";
@@ -11,6 +11,7 @@ import { FieldRenderer } from "./FieldRenderer";
 import { FormSkeleton } from "./FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getRoles } from "@/lib/auth";
 
 export function EntityFormPage({
   entityKey,
@@ -23,9 +24,25 @@ export function EntityFormPage({
 }) {
   const entity = getEntity(entityKey);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roles = getRoles();
+  const isAdmin = roles.some((role) => role.toLowerCase() === "admin");
+  const isReadOnly =
+    typeof entity.readOnly === "function" ? entity.readOnly(roles) : Boolean(entity.readOnly);
 
   if (!entity) {
     return <div>Entity non trovata.</div>;
+  }
+  if (entity.requiresAdmin && !isAdmin) {
+    return <div>Non autorizzato.</div>;
+  }
+  if (isReadOnly) {
+    return <div>Operazione non disponibile.</div>;
+  }
+
+  const parentId = entity.parent ? Number(searchParams.get(entity.parent.param)) : undefined;
+  if (mode === "create" && entity.parent && (!parentId || Number.isNaN(parentId))) {
+    return <div>Seleziona prima {entity.parent.label.toLowerCase()}.</div>;
   }
 
   const visibleFields = entity.form.fields.filter((field) => {
@@ -56,7 +73,7 @@ export function EntityFormPage({
   });
 
   const { data, isLoading } = useEntity(entityKey, id ?? Number.NaN);
-  const createMutation = useCreateEntity(entityKey);
+  const createMutation = useCreateEntity(entityKey, entity.parent && parentId ? { parentId } : undefined);
   const updateMutation = useUpdateEntity(entityKey, id ?? 0);
 
   useEffect(() => {
