@@ -3,7 +3,7 @@ import { defineConfig } from "orval";
 export default defineConfig({
   api: {
     input: {
-      target: "./openapi_TOBE.yaml",
+      target: "./openapi.yaml",
     },
     output: {
       client: "fetch",

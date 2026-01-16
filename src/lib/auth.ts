@@ -1,4 +1,4 @@
-import { postAuthLogin, type LoginRequest, type TokenResponse } from "@/generated/api";
+import { postLogin, type LoginRequest, type LoginResponse } from "@/generated/api";
 
 const TOKEN_KEY = "chemrisk_token";
 const ROLES_KEY = "chemrisk_roles";
@@ -48,8 +48,8 @@ export function getRoles(): string[] {
   }
 }
 
-export async function login(payload: LoginRequest): Promise<TokenResponse> {
-  return postAuthLogin(payload);
+export async function login(payload: LoginRequest): Promise<LoginResponse> {
+  return postLogin(payload);
 }
 
 export function logout() {

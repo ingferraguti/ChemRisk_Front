@@ -4,14 +4,14 @@ import { clearToken, getToken } from "./auth";
  * HTTP helper used by generated OpenAPI clients.
  *
  * Example .env.local:
- *   NEXT_PUBLIC_API_BASE_URL=https://example.com/api
+ *   NEXT_PUBLIC_API_BASE_URL=https://example.com/api/action.php
  *
  * Note: storing the token in localStorage is an MVP choice. For SSR,
  * move auth to secure httpOnly cookies.
  */
-const DEFAULT_BASE_URL = "/api";
+const DEFAULT_BASE_URL = "/api/action.php";
 
-const AUTH_FREE_PATHS = new Set(["/auth/login"]);
+const AUTH_FREE_PATHS = new Set(["/login", "/auth/login", "/verifyToken"]);
 
 const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
 

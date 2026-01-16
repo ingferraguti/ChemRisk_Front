@@ -41,6 +41,30 @@ export function Sidebar() {
         >
           Profilo
         </Link>
+        <Link
+          href="/app/calcoli-valutazioni"
+          className={cn(
+            "block rounded-md px-3 py-2 text-sm font-medium",
+            pathname === "/app/calcoli-valutazioni"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted"
+          )}
+        >
+          Calcoli
+        </Link>
+        {isAdmin && (
+          <Link
+            href="/app/debug"
+            className={cn(
+              "block rounded-md px-3 py-2 text-sm font-medium",
+              pathname === "/app/debug"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:bg-muted"
+            )}
+          >
+            Debug Auth
+          </Link>
+        )}
         {items.map((entity) => (
           <Link
             key={entity.key}

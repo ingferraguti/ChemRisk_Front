@@ -14,6 +14,7 @@ import { HttpError } from "@/lib/http";
 import {
   postCalcoliValutazioni,
   postCalcoliValutazioniId,
+  postUserIdChangePassword,
   type CalcoloValutazioneRequest,
   type CalcoloValutazioneResponse,
 } from "@/generated/api";
@@ -59,6 +60,7 @@ export function EntityDetailPage({ entityKey, id }: { entityKey: string; id: num
 
   const entries = Object.entries(data as Record<string, unknown>);
   const showCalcoli = entity.key === "valutazioni";
+  const showUserBaseChangePassword = entity.key === "user-base";
 
   return (
     <div className="space-y-4">
@@ -101,6 +103,23 @@ export function EntityDetailPage({ entityKey, id }: { entityKey: string; id: num
               <Link href={`${child.routeBase}?${child.param}=${id}`}>{child.label}</Link>
             </Button>
           ))}
+          {showUserBaseChangePassword && (
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  await postUserIdChangePassword(id);
+                  toast.success("Password aggiornata");
+                } catch (changeError) {
+                  const message =
+                    changeError instanceof Error ? changeError.message : "Errore cambio password";
+                  toast.error(message);
+                }
+              }}
+            >
+              Cambio password (stub)
+            </Button>
+          )}
         </div>
       </div>
       <div className="rounded-lg border bg-background p-6 shadow">

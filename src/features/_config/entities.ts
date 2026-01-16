@@ -1,104 +1,50 @@
 import type { EntityConfig, FieldOption } from "@/features/_crud/types";
 import {
   deleteAdminUsersId,
-  deleteAdminFrasihId,
-  deleteAdminCodificheStatoFisicoInalId,
-  deleteAdminCodificheTipoUsoInalId,
-  deleteAdminCodificheTipoControlloInalId,
-  deleteAdminCodificheLivelliContattoCutaneoId,
-  deleteAdminCodificheTipoControlloProcId,
-  deleteAziendeId,
-  deleteAreeId,
-  deleteLavoratoriId,
-  deleteValutazioniId,
   deleteAgentiChimiciId,
+  deleteFrasihId,
+  deleteSostanzaId,
+  deleteUserId,
+  deleteUsersId,
   getAdminUsers,
   getAdminUsersId,
-  patchAdminUsersId,
-  postAdminUsers,
-  getFrasih,
-  getFrasihId,
-  postAdminFrasih,
-  patchAdminFrasihId,
-  getCodificheStatoFisicoInal,
-  getCodificheStatoFisicoInalId,
-  getCodificheTipoUsoInal,
-  getCodificheTipoUsoInalId,
-  getCodificheTipoControlloInal,
-  getCodificheTipoControlloInalId,
-  getCodificheLivelliContattoCutaneo,
-  getCodificheLivelliContattoCutaneoId,
-  getCodificheTipoControlloProc,
-  getCodificheTipoControlloProcId,
-  getAdminCodificheStatoFisicoInal,
-  getAdminCodificheStatoFisicoInalId,
-  postAdminCodificheStatoFisicoInal,
-  patchAdminCodificheStatoFisicoInalId,
-  getAdminCodificheTipoUsoInal,
-  getAdminCodificheTipoUsoInalId,
-  postAdminCodificheTipoUsoInal,
-  patchAdminCodificheTipoUsoInalId,
-  getAdminCodificheTipoControlloInal,
-  getAdminCodificheTipoControlloInalId,
-  postAdminCodificheTipoControlloInal,
-  patchAdminCodificheTipoControlloInalId,
-  getAdminCodificheLivelliContattoCutaneo,
-  getAdminCodificheLivelliContattoCutaneoId,
-  postAdminCodificheLivelliContattoCutaneo,
-  patchAdminCodificheLivelliContattoCutaneoId,
-  getAdminCodificheTipoControlloProc,
-  getAdminCodificheTipoControlloProcId,
-  postAdminCodificheTipoControlloProc,
-  patchAdminCodificheTipoControlloProcId,
-  getAziende,
-  getAziendeId,
-  postAziende,
-  patchAziendeId,
-  getAziendeAziendaIdAree,
-  postAziendeAziendaIdAree,
-  getAreeId,
-  patchAreeId,
-  getAreeAreaIdLavoratori,
-  postAreeAreaIdLavoratori,
-  getLavoratoriId,
-  patchLavoratoriId,
-  getLavoratoriLavoratoreIdValutazioni,
-  postLavoratoriLavoratoreIdValutazioni,
-  getValutazioniId,
-  patchValutazioniId,
   getAgentiChimici,
   getAgentiChimiciId,
-  postAgentiChimici,
+  getFrasih,
+  getFrasihId,
+  getSostanza,
+  getSostanzaFindByFrasiHKey,
+  getSostanzaFindByUserKey,
+  getSostanzaFindByVLEPKey,
+  getSostanzaId,
+  getUser,
+  getUserId,
+  getUsers,
+  getUsersId,
+  patchAdminUsersId,
   patchAgentiChimiciId,
+  postAdminUsers,
+  postAgentiChimici,
+  postFrasih,
+  postFrasihId,
+  postSostanza,
+  postSostanzaId,
+  postUser,
+  postUserId,
+  postUsers,
+  postUsersId,
   AgenteChimicoTipo,
-  type FrasiH,
-  type FrasiHCreate,
-  type FrasiHUpdate,
-  type Codifica,
-  type CodificaCreate,
-  type CodificaUpdate,
-  type User,
-  type UserAdminCreate,
-  type UserAdminUpdate,
-  type Azienda,
-  type AziendaCreate,
-  type AziendaUpdate,
-  type Area,
-  type AreaCreate,
-  type AreaUpdate,
-  type Lavoratore,
-  type LavoratoreCreate,
-  type LavoratoreUpdate,
   type AgenteChimico,
   type AgenteChimicoCreate,
   type PatchAgentiChimiciIdBody,
-  type Valutazione,
-  type ValutazioneCreate,
-  type ValutazioneUpdate,
+  type FrasiH,
+  type Sostanza,
+  type User,
+  type UserAdminCreate,
+  type UserAdminUpdate,
+  type UserBase,
+  type UserWithRoles,
 } from "@/generated/api";
-import { getRoles } from "@/lib/auth";
-
-const isAdmin = () => getRoles().some((role) => role.toLowerCase() === "admin");
 
 const parseNumber = (value: unknown) => {
   if (value === "" || value == null) {
@@ -111,173 +57,276 @@ const parseNumber = (value: unknown) => {
 const frasiHOptions = async (): Promise<FieldOption[]> => {
   const list = await getFrasih();
   return list.map((item) => ({
-    label: `${item.codice} - ${item.descrizione}`,
-    value: item.id,
+    label: `${item.Codice} - ${item.Descrizione}`,
+    value: item.id ?? 0,
   }));
 };
 
-const codificaOptions = async (loader: () => Promise<Codifica[]>): Promise<FieldOption[]> => {
-  const list = await loader();
+const sostanzaOptions = async (): Promise<FieldOption[]> => {
+  const list = await getSostanza();
   return list.map((item) => ({
-    label: `${item.codice} - ${item.descrizione}`,
-    value: item.id,
+    label: `${item.Nome} (${item.Identificativo})`,
+    value: item.id ?? 0,
   }));
-};
-
-const agentiChimiciOptions = async (): Promise<FieldOption[]> => {
-  const list = await getAgentiChimici();
-  return list.map((item) => ({
-    label: `${item.nome} (${item.identificativo})`,
-    value: item.id,
-  }));
-};
-
-const sostanzeComponentiOptions = async (): Promise<FieldOption[]> => {
-  const list = await getAgentiChimici();
-  return list
-    .filter((item) => item.tipo === "sostanza")
-    .map((item) => ({
-      label: `${item.nome} (${item.identificativo})`,
-      value: item.id,
-    }));
 };
 
 export const ENTITIES: Array<
-  | EntityConfig<FrasiH[], FrasiH, FrasiHCreate, FrasiHUpdate>
-  | EntityConfig<Codifica[], Codifica, CodificaCreate, CodificaUpdate>
-  | EntityConfig<User[], User, UserAdminCreate, UserAdminUpdate>
-  | EntityConfig<Azienda[], Azienda, AziendaCreate, AziendaUpdate>
-  | EntityConfig<Area[], Area, AreaCreate, AreaUpdate>
-  | EntityConfig<Lavoratore[], Lavoratore, LavoratoreCreate, LavoratoreUpdate>
+  | EntityConfig<FrasiH[], FrasiH, FrasiH, FrasiH>
+  | EntityConfig<Sostanza[], Sostanza, Sostanza, Sostanza>
   | EntityConfig<AgenteChimico[], AgenteChimico, AgenteChimicoCreate, PatchAgentiChimiciIdBody>
-  | EntityConfig<Valutazione[], Valutazione, ValutazioneCreate, ValutazioneUpdate>
+  | EntityConfig<User[], User, UserAdminCreate, UserAdminUpdate>
+  | EntityConfig<UserWithRoles[], UserWithRoles, UserAdminCreate, UserAdminUpdate>
+  | EntityConfig<UserBase[], UserBase, UserBase, UserBase>
 > = [
   {
-    key: "aziende",
-    label: "Aziende",
-    routes: { base: "/app/aziende" },
+    key: "frasih",
+    label: "Frasi H",
+    routes: { base: "/app/frasih" },
     idField: "id",
     list: {
       enableSearch: true,
       searchMode: "client",
       columns: [
         { key: "id", label: "ID" },
-        { key: "nome", label: "Nome" },
-        { key: "note", label: "Note" },
+        { key: "Codice", label: "Codice" },
+        { key: "Descrizione", label: "Descrizione" },
+        { key: "Punteggio", label: "Punteggio" },
       ],
     },
     form: {
       fields: [
-        { name: "nome", label: "Nome", type: "string", required: true },
-        { name: "note", label: "Note", type: "string", required: false, multiline: true },
+        { name: "Codice", label: "Codice", type: "string", required: true },
+        {
+          name: "Descrizione",
+          label: "Descrizione",
+          type: "string",
+          required: true,
+          multiline: true,
+        },
+        { name: "Punteggio", label: "Punteggio", type: "number", required: true },
       ],
     },
     api: {
-      list: () => getAziende(),
-      get: getAziendeId,
-      create: postAziende,
-      update: patchAziendeId,
+      list: () => getFrasih(),
+      get: getFrasihId,
+      create: postFrasih,
+      update: postFrasihId,
       remove: async (id: number) => {
-        await deleteAziendeId(id);
+        await deleteFrasihId(id);
         return true;
       },
     },
-    children: [
-      { label: "Aree", routeBase: "/app/aree", param: "aziendaId" },
-    ],
   },
   {
-    key: "aree",
-    label: "Aree",
-    routes: { base: "/app/aree" },
+    key: "sostanza",
+    label: "Sostanze",
+    routes: { base: "/app/sostanza" },
     idField: "id",
-    parent: { param: "aziendaId", label: "Aziende", routeBase: "/app/aziende" },
     list: {
       enableSearch: true,
       searchMode: "client",
       columns: [
         { key: "id", label: "ID" },
-        { key: "aziendaId", label: "Azienda ID" },
-        { key: "nome", label: "Nome" },
-        { key: "note", label: "Note" },
+        { key: "Identificativo", label: "Identificativo" },
+        { key: "Nome", label: "Nome" },
+        { key: "Score", label: "Score" },
+        { key: "VLEP", label: "VLEP" },
+        { key: "User", label: "User" },
       ],
     },
     form: {
       fields: [
-        { name: "nome", label: "Nome", type: "string", required: true },
-        { name: "note", label: "Note", type: "string", required: false, multiline: true },
+        { name: "Identificativo", label: "Identificativo", type: "string", required: true },
+        { name: "Nome", label: "Nome", type: "string", required: true },
+        { name: "Score", label: "Score", type: "number", required: true, parse: parseNumber },
+        { name: "VLEP", label: "VLEP", type: "boolean", required: true },
+        {
+          name: "User",
+          label: "User",
+          type: "number",
+          required: true,
+          parse: parseNumber,
+          description: "ID utente proprietario.",
+        },
+        {
+          name: "FrasiH",
+          label: "Frasi H",
+          type: "relation",
+          required: true,
+          multiple: true,
+          loadOptions: frasiHOptions,
+        },
       ],
     },
     api: {
-      list: (context) => {
-        if (!context?.parentId) {
-          return Promise.resolve([] as Area[]);
-        }
-        return getAziendeAziendaIdAree(context.parentId);
-      },
-      get: getAreeId,
-      create: (payload, context) => {
-        if (!context?.parentId) {
-          throw new Error("aziendaId obbligatorio");
-        }
-        return postAziendeAziendaIdAree(context.parentId, payload);
-      },
-      update: patchAreeId,
+      list: () => getSostanza(),
+      get: getSostanzaId,
+      create: postSostanza,
+      update: postSostanzaId,
       remove: async (id: number) => {
-        await deleteAreeId(id);
+        await deleteSostanzaId(id);
         return true;
       },
     },
-    children: [
-      { label: "Lavoratori", routeBase: "/app/lavoratori", param: "areaId" },
-    ],
   },
   {
-    key: "lavoratori",
-    label: "Lavoratori",
-    routes: { base: "/app/lavoratori" },
+    key: "sostanza-by-frasih",
+    label: "Sostanze (Filtro Frasi H)",
+    routes: { base: "/app/sostanza-by-frasih" },
     idField: "id",
-    parent: { param: "areaId", label: "Aree", routeBase: "/app/aree" },
     list: {
       enableSearch: true,
-      searchMode: "client",
+      searchMode: "server",
       columns: [
         { key: "id", label: "ID" },
-        { key: "areaId", label: "Area ID" },
-        { key: "codice", label: "Codice" },
-        { key: "mansione", label: "Mansione" },
+        { key: "Identificativo", label: "Identificativo" },
+        { key: "Nome", label: "Nome" },
+        { key: "Score", label: "Score" },
+        { key: "VLEP", label: "VLEP" },
       ],
     },
     form: {
       fields: [
-        { name: "codice", label: "Codice", type: "string", required: true },
-        { name: "mansione", label: "Mansione", type: "string", required: false },
-        { name: "note", label: "Note", type: "string", required: false, multiline: true },
+        { name: "Identificativo", label: "Identificativo", type: "string", required: true },
+        { name: "Nome", label: "Nome", type: "string", required: true },
+        { name: "Score", label: "Score", type: "number", required: true, parse: parseNumber },
+        { name: "VLEP", label: "VLEP", type: "boolean", required: true },
+        { name: "User", label: "User", type: "number", required: true, parse: parseNumber },
+        {
+          name: "FrasiH",
+          label: "Frasi H",
+          type: "relation",
+          required: true,
+          multiple: true,
+          loadOptions: frasiHOptions,
+        },
       ],
     },
     api: {
-      list: (context) => {
-        if (!context?.parentId) {
-          return Promise.resolve([] as Lavoratore[]);
-        }
-        return getAreeAreaIdLavoratori(context.parentId);
-      },
-      get: getLavoratoriId,
-      create: (payload, context) => {
-        if (!context?.parentId) {
-          throw new Error("areaId obbligatorio");
-        }
-        return postAreeAreaIdLavoratori(context.parentId, payload);
-      },
-      update: patchLavoratoriId,
+      list: () => getSostanza(),
+      get: getSostanzaId,
+      create: postSostanza,
+      update: postSostanzaId,
       remove: async (id: number) => {
-        await deleteLavoratoriId(id);
+        await deleteSostanzaId(id);
         return true;
       },
     },
-    children: [
-      { label: "Valutazioni", routeBase: "/app/valutazioni", param: "lavoratoreId" },
-    ],
+    serverSearch: async (query: string) => {
+      const id = Number(query);
+      if (Number.isNaN(id)) {
+        return [];
+      }
+      return getSostanzaFindByFrasiHKey(id);
+    },
+    readOnly: true,
+  },
+  {
+    key: "sostanza-by-user",
+    label: "Sostanze (Filtro User)",
+    routes: { base: "/app/sostanza-by-user" },
+    idField: "id",
+    list: {
+      enableSearch: true,
+      searchMode: "server",
+      columns: [
+        { key: "id", label: "ID" },
+        { key: "Identificativo", label: "Identificativo" },
+        { key: "Nome", label: "Nome" },
+        { key: "Score", label: "Score" },
+        { key: "VLEP", label: "VLEP" },
+      ],
+    },
+    form: {
+      fields: [
+        { name: "Identificativo", label: "Identificativo", type: "string", required: true },
+        { name: "Nome", label: "Nome", type: "string", required: true },
+        { name: "Score", label: "Score", type: "number", required: true, parse: parseNumber },
+        { name: "VLEP", label: "VLEP", type: "boolean", required: true },
+        { name: "User", label: "User", type: "number", required: true, parse: parseNumber },
+        {
+          name: "FrasiH",
+          label: "Frasi H",
+          type: "relation",
+          required: true,
+          multiple: true,
+          loadOptions: frasiHOptions,
+        },
+      ],
+    },
+    api: {
+      list: () => getSostanza(),
+      get: getSostanzaId,
+      create: postSostanza,
+      update: postSostanzaId,
+      remove: async (id: number) => {
+        await deleteSostanzaId(id);
+        return true;
+      },
+    },
+    serverSearch: async (query: string) => {
+      const id = Number(query);
+      if (Number.isNaN(id)) {
+        return [];
+      }
+      return getSostanzaFindByUserKey(id);
+    },
+    readOnly: true,
+  },
+  {
+    key: "sostanza-by-vlep",
+    label: "Sostanze (Filtro VLEP)",
+    routes: { base: "/app/sostanza-by-vlep" },
+    idField: "id",
+    list: {
+      enableSearch: true,
+      searchMode: "server",
+      columns: [
+        { key: "id", label: "ID" },
+        { key: "Identificativo", label: "Identificativo" },
+        { key: "Nome", label: "Nome" },
+        { key: "Score", label: "Score" },
+        { key: "VLEP", label: "VLEP" },
+      ],
+    },
+    form: {
+      fields: [
+        { name: "Identificativo", label: "Identificativo", type: "string", required: true },
+        { name: "Nome", label: "Nome", type: "string", required: true },
+        { name: "Score", label: "Score", type: "number", required: true, parse: parseNumber },
+        { name: "VLEP", label: "VLEP", type: "boolean", required: true },
+        { name: "User", label: "User", type: "number", required: true, parse: parseNumber },
+        {
+          name: "FrasiH",
+          label: "Frasi H",
+          type: "relation",
+          required: true,
+          multiple: true,
+          loadOptions: frasiHOptions,
+        },
+      ],
+    },
+    api: {
+      list: () => getSostanza(),
+      get: getSostanzaId,
+      create: postSostanza,
+      update: postSostanzaId,
+      remove: async (id: number) => {
+        await deleteSostanzaId(id);
+        return true;
+      },
+    },
+    serverSearch: async (query: string) => {
+      const normalized = query.trim().toLowerCase();
+      if (!normalized) {
+        return [];
+      }
+      if (normalized !== "true" && normalized !== "false") {
+        return [];
+      }
+      return getSostanzaFindByVLEPKey(normalized === "true");
+    },
+    readOnly: true,
   },
   {
     key: "agenti-chimici",
@@ -327,7 +376,7 @@ export const ENTITIES: Array<
           type: "relation",
           multiple: true,
           required: false,
-          loadOptions: sostanzeComponentiOptions,
+          loadOptions: sostanzaOptions,
           parse: (value) => (Array.isArray(value) && value.length > 0 ? value : undefined),
         },
       ],
@@ -344,197 +393,8 @@ export const ENTITIES: Array<
     },
   },
   {
-    key: "valutazioni",
-    label: "Valutazioni",
-    routes: { base: "/app/valutazioni" },
-    idField: "id",
-    parent: { param: "lavoratoreId", label: "Lavoratori", routeBase: "/app/lavoratori" },
-    list: {
-      enableSearch: true,
-      searchMode: "client",
-      columns: [
-        { key: "id", label: "ID" },
-        { key: "lavoratoreId", label: "Lavoratore ID" },
-        { key: "agenteChimicoId", label: "Agente ID" },
-        { key: "nome", label: "Nome" },
-        { key: "data", label: "Data" },
-      ],
-    },
-    form: {
-      fields: [
-        {
-          name: "agenteChimicoId",
-          label: "Agente chimico",
-          type: "relation",
-          required: true,
-          loadOptions: agentiChimiciOptions,
-          parse: parseNumber,
-        },
-        { name: "nome", label: "Nome", type: "string", required: true },
-        {
-          name: "data",
-          label: "Data",
-          type: "date",
-          required: true,
-          parse: (value) => {
-            const stringValue = String(value ?? "");
-            return stringValue ? new Date(stringValue).toISOString() : undefined;
-          },
-        },
-        { name: "einal", label: "Einal", type: "number", required: false, parse: parseNumber },
-        {
-          name: "statoFisicoInal",
-          label: "Stato fisico inalazione",
-          type: "relation",
-          required: false,
-          loadOptions: () => codificaOptions(getCodificheStatoFisicoInal),
-          parse: parseNumber,
-        },
-        {
-          name: "quantitaKg",
-          label: "Quantita (kg)",
-          type: "number",
-          required: false,
-          parse: parseNumber,
-          description: "Unita: kg",
-        },
-        {
-          name: "tipoUsoInal",
-          label: "Tipo uso inalazione",
-          type: "relation",
-          required: false,
-          loadOptions: () => codificaOptions(getCodificheTipoUsoInal),
-          parse: parseNumber,
-        },
-        {
-          name: "tipoControlloInal",
-          label: "Tipo controllo inalazione",
-          type: "relation",
-          required: false,
-          loadOptions: () => codificaOptions(getCodificheTipoControlloInal),
-          parse: parseNumber,
-        },
-        {
-          name: "tempoInalMin",
-          label: "Tempo inalazione (min)",
-          type: "number",
-          required: false,
-          parse: parseNumber,
-          description: "Unita: minuti",
-        },
-        {
-          name: "distanzaM",
-          label: "Distanza (m)",
-          type: "number",
-          required: false,
-          parse: parseNumber,
-          description: "Unita: metri",
-        },
-        { name: "ecute", label: "Ecute", type: "number", required: false, parse: parseNumber },
-        {
-          name: "esposizioneCutanea",
-          label: "Esposizione cutanea",
-          type: "boolean",
-          required: false,
-        },
-        {
-          name: "livelliContattoCutaneo",
-          label: "Livelli contatto cutaneo",
-          type: "relation",
-          required: false,
-          loadOptions: () => codificaOptions(getCodificheLivelliContattoCutaneo),
-          parse: parseNumber,
-        },
-        {
-          name: "tipoControlloProc",
-          label: "Tipo controllo processo",
-          type: "relation",
-          required: false,
-          loadOptions: () => codificaOptions(getCodificheTipoControlloProc),
-          parse: parseNumber,
-        },
-        {
-          name: "quantitaProcKg",
-          label: "Quantita processo (kg)",
-          type: "number",
-          required: false,
-          parse: parseNumber,
-          description: "Unita: kg",
-        },
-        {
-          name: "tempoProcMin",
-          label: "Tempo processo (min)",
-          type: "number",
-          required: false,
-          parse: parseNumber,
-          description: "Unita: minuti",
-        },
-      ],
-    },
-    api: {
-      list: (context) => {
-        if (!context?.parentId) {
-          return Promise.resolve([] as Valutazione[]);
-        }
-        return getLavoratoriLavoratoreIdValutazioni(context.parentId);
-      },
-      get: getValutazioniId,
-      create: (payload, context) => {
-        if (!context?.parentId) {
-          throw new Error("lavoratoreId obbligatorio");
-        }
-        return postLavoratoriLavoratoreIdValutazioni(context.parentId, payload);
-      },
-      update: patchValutazioniId,
-      remove: async (id: number) => {
-        await deleteValutazioniId(id);
-        return true;
-      },
-    },
-  },
-  {
-    key: "frasih",
-    label: "Frasi H",
-    routes: { base: "/app/frasih" },
-    idField: "id",
-    list: {
-      enableSearch: true,
-      searchMode: "client",
-      columns: [
-        { key: "id", label: "ID" },
-        { key: "codice", label: "Codice" },
-        { key: "descrizione", label: "Descrizione" },
-        { key: "punteggio", label: "Punteggio" },
-      ],
-    },
-    form: {
-      fields: [
-        { name: "codice", label: "Codice", type: "string", required: true, hideOnEdit: true },
-        {
-          name: "descrizione",
-          label: "Descrizione",
-          type: "string",
-          required: true,
-          multiline: true,
-        },
-        { name: "punteggio", label: "Punteggio", type: "number", required: true, parse: parseNumber },
-      ],
-    },
-    api: {
-      list: () => getFrasih(),
-      get: getFrasihId,
-      create: postAdminFrasih,
-      update: patchAdminFrasihId,
-      remove: async (id: number) => {
-        await deleteAdminFrasihId(id);
-        return true;
-      },
-    },
-    readOnly: (roles) => !roles.some((role) => role.toLowerCase() === "admin"),
-  },
-  {
     key: "admin-users",
-    label: "Utenti",
+    label: "Utenti (Admin)",
     routes: { base: "/app/admin-users" },
     idField: "id",
     list: {
@@ -609,191 +469,120 @@ export const ENTITIES: Array<
     requiresAdmin: true,
   },
   {
-    key: "codifiche-stato-fisico-inal",
-    label: "Codifiche - Stato fisico inal",
-    routes: { base: "/app/codifiche-stato-fisico-inal" },
+    key: "users-roles",
+    label: "Utenti con ruoli (Legacy)",
+    routes: { base: "/app/users-roles" },
     idField: "id",
     list: {
       enableSearch: true,
       searchMode: "client",
       columns: [
         { key: "id", label: "ID" },
-        { key: "codice", label: "Codice" },
-        { key: "descrizione", label: "Descrizione" },
-        { key: "ordine", label: "Ordine" },
-        { key: "isActive", label: "Attivo" },
+        { key: "username", label: "Username" },
+        { key: "mail", label: "Email" },
+        { key: "name", label: "Nome" },
+        { key: "surname", label: "Cognome" },
       ],
     },
     form: {
       fields: [
-        { name: "codice", label: "Codice", type: "string", required: true },
-        { name: "descrizione", label: "Descrizione", type: "string", required: true, multiline: true },
-        { name: "ordine", label: "Ordine", type: "number", required: false, parse: parseNumber },
-        { name: "isActive", label: "Attivo", type: "boolean", required: false },
+        { name: "username", label: "Username", type: "string", required: true, hideOnEdit: true },
+        {
+          name: "password",
+          label: "Password",
+          type: "string",
+          required: true,
+          hideOnEdit: true,
+          description: "Minimo 8 caratteri.",
+        },
+        { name: "mail", label: "Email", type: "string", required: false },
+        { name: "name", label: "Nome", type: "string", required: false },
+        { name: "surname", label: "Cognome", type: "string", required: false },
+        {
+          name: "roles",
+          label: "Ruoli",
+          type: "string",
+          required: true,
+          multiline: true,
+          placeholder: "ADMIN,USER",
+          parse: (value) =>
+            String(value ?? "")
+              .split(",")
+              .map((role) => role.trim())
+              .filter(Boolean),
+          hideOnEdit: true,
+        },
+        {
+          name: "roles",
+          label: "Ruoli",
+          type: "string",
+          required: false,
+          multiline: true,
+          placeholder: "ADMIN,USER",
+          parse: (value) => {
+            const parsed = String(value ?? "")
+              .split(",")
+              .map((role) => role.trim())
+              .filter(Boolean);
+            return parsed.length > 0 ? parsed : undefined;
+          },
+          hideOnCreate: true,
+        },
       ],
     },
     api: {
-      list: () => (isAdmin() ? getAdminCodificheStatoFisicoInal() : getCodificheStatoFisicoInal()),
-      get: (id) =>
-        isAdmin() ? getAdminCodificheStatoFisicoInalId(id) : getCodificheStatoFisicoInalId(id),
-      create: (payload) => postAdminCodificheStatoFisicoInal(payload),
-      update: (id, payload) => patchAdminCodificheStatoFisicoInalId(id, payload),
+      list: () => getUsers(),
+      get: getUsersId,
+      create: postUsers,
+      update: postUsersId,
       remove: async (id: number) => {
-        await deleteAdminCodificheStatoFisicoInalId(id);
+        await deleteUsersId(id);
         return true;
       },
     },
-    readOnly: (roles) => !roles.some((role) => role.toLowerCase() === "admin"),
+    requiresAdmin: true,
   },
   {
-    key: "codifiche-tipo-uso-inal",
-    label: "Codifiche - Tipo uso inal",
-    routes: { base: "/app/codifiche-tipo-uso-inal" },
+    key: "user-base",
+    label: "Utenti base",
+    routes: { base: "/app/user-base" },
     idField: "id",
     list: {
       enableSearch: true,
       searchMode: "client",
       columns: [
         { key: "id", label: "ID" },
-        { key: "codice", label: "Codice" },
-        { key: "descrizione", label: "Descrizione" },
-        { key: "ordine", label: "Ordine" },
-        { key: "isActive", label: "Attivo" },
+        { key: "username", label: "Username" },
+        { key: "mail", label: "Email" },
+        { key: "name", label: "Nome" },
+        { key: "surname", label: "Cognome" },
       ],
     },
     form: {
       fields: [
-        { name: "codice", label: "Codice", type: "string", required: true },
-        { name: "descrizione", label: "Descrizione", type: "string", required: true, multiline: true },
-        { name: "ordine", label: "Ordine", type: "number", required: false, parse: parseNumber },
-        { name: "isActive", label: "Attivo", type: "boolean", required: false },
+        { name: "mail", label: "Email", type: "string", required: false },
+        { name: "name", label: "Nome", type: "string", required: false },
+        { name: "surname", label: "Cognome", type: "string", required: false },
+        { name: "username", label: "Username", type: "string", required: false },
+        {
+          name: "password",
+          label: "Password",
+          type: "string",
+          required: false,
+          description: "Gestito dal backend se necessario.",
+        },
       ],
     },
     api: {
-      list: () => (isAdmin() ? getAdminCodificheTipoUsoInal() : getCodificheTipoUsoInal()),
-      get: (id) => (isAdmin() ? getAdminCodificheTipoUsoInalId(id) : getCodificheTipoUsoInalId(id)),
-      create: (payload) => postAdminCodificheTipoUsoInal(payload),
-      update: (id, payload) => patchAdminCodificheTipoUsoInalId(id, payload),
+      list: () => getUser(),
+      get: getUserId,
+      create: postUser,
+      update: postUserId,
       remove: async (id: number) => {
-        await deleteAdminCodificheTipoUsoInalId(id);
+        await deleteUserId(id);
         return true;
       },
     },
-    readOnly: (roles) => !roles.some((role) => role.toLowerCase() === "admin"),
-  },
-  {
-    key: "codifiche-tipo-controllo-inal",
-    label: "Codifiche - Tipo controllo inal",
-    routes: { base: "/app/codifiche-tipo-controllo-inal" },
-    idField: "id",
-    list: {
-      enableSearch: true,
-      searchMode: "client",
-      columns: [
-        { key: "id", label: "ID" },
-        { key: "codice", label: "Codice" },
-        { key: "descrizione", label: "Descrizione" },
-        { key: "ordine", label: "Ordine" },
-        { key: "isActive", label: "Attivo" },
-      ],
-    },
-    form: {
-      fields: [
-        { name: "codice", label: "Codice", type: "string", required: true },
-        { name: "descrizione", label: "Descrizione", type: "string", required: true, multiline: true },
-        { name: "ordine", label: "Ordine", type: "number", required: false, parse: parseNumber },
-        { name: "isActive", label: "Attivo", type: "boolean", required: false },
-      ],
-    },
-    api: {
-      list: () => (isAdmin() ? getAdminCodificheTipoControlloInal() : getCodificheTipoControlloInal()),
-      get: (id) =>
-        isAdmin() ? getAdminCodificheTipoControlloInalId(id) : getCodificheTipoControlloInalId(id),
-      create: (payload) => postAdminCodificheTipoControlloInal(payload),
-      update: (id, payload) => patchAdminCodificheTipoControlloInalId(id, payload),
-      remove: async (id: number) => {
-        await deleteAdminCodificheTipoControlloInalId(id);
-        return true;
-      },
-    },
-    readOnly: (roles) => !roles.some((role) => role.toLowerCase() === "admin"),
-  },
-  {
-    key: "codifiche-livelli-contatto-cutaneo",
-    label: "Codifiche - Livelli contatto cutaneo",
-    routes: { base: "/app/codifiche-livelli-contatto-cutaneo" },
-    idField: "id",
-    list: {
-      enableSearch: true,
-      searchMode: "client",
-      columns: [
-        { key: "id", label: "ID" },
-        { key: "codice", label: "Codice" },
-        { key: "descrizione", label: "Descrizione" },
-        { key: "ordine", label: "Ordine" },
-        { key: "isActive", label: "Attivo" },
-      ],
-    },
-    form: {
-      fields: [
-        { name: "codice", label: "Codice", type: "string", required: true },
-        { name: "descrizione", label: "Descrizione", type: "string", required: true, multiline: true },
-        { name: "ordine", label: "Ordine", type: "number", required: false, parse: parseNumber },
-        { name: "isActive", label: "Attivo", type: "boolean", required: false },
-      ],
-    },
-    api: {
-      list: () =>
-        isAdmin() ? getAdminCodificheLivelliContattoCutaneo() : getCodificheLivelliContattoCutaneo(),
-      get: (id) =>
-        isAdmin()
-          ? getAdminCodificheLivelliContattoCutaneoId(id)
-          : getCodificheLivelliContattoCutaneoId(id),
-      create: (payload) => postAdminCodificheLivelliContattoCutaneo(payload),
-      update: (id, payload) => patchAdminCodificheLivelliContattoCutaneoId(id, payload),
-      remove: async (id: number) => {
-        await deleteAdminCodificheLivelliContattoCutaneoId(id);
-        return true;
-      },
-    },
-    readOnly: (roles) => !roles.some((role) => role.toLowerCase() === "admin"),
-  },
-  {
-    key: "codifiche-tipo-controllo-proc",
-    label: "Codifiche - Tipo controllo proc",
-    routes: { base: "/app/codifiche-tipo-controllo-proc" },
-    idField: "id",
-    list: {
-      enableSearch: true,
-      searchMode: "client",
-      columns: [
-        { key: "id", label: "ID" },
-        { key: "codice", label: "Codice" },
-        { key: "descrizione", label: "Descrizione" },
-        { key: "ordine", label: "Ordine" },
-        { key: "isActive", label: "Attivo" },
-      ],
-    },
-    form: {
-      fields: [
-        { name: "codice", label: "Codice", type: "string", required: true },
-        { name: "descrizione", label: "Descrizione", type: "string", required: true, multiline: true },
-        { name: "ordine", label: "Ordine", type: "number", required: false, parse: parseNumber },
-        { name: "isActive", label: "Attivo", type: "boolean", required: false },
-      ],
-    },
-    api: {
-      list: () => (isAdmin() ? getAdminCodificheTipoControlloProc() : getCodificheTipoControlloProc()),
-      get: (id) =>
-        isAdmin() ? getAdminCodificheTipoControlloProcId(id) : getCodificheTipoControlloProcId(id),
-      create: (payload) => postAdminCodificheTipoControlloProc(payload),
-      update: (id, payload) => patchAdminCodificheTipoControlloProcId(id, payload),
-      remove: async (id: number) => {
-        await deleteAdminCodificheTipoControlloProcId(id);
-        return true;
-      },
-    },
-    readOnly: (roles) => !roles.some((role) => role.toLowerCase() === "admin"),
   },
 ];
 

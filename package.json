@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate:api": "orval"
+    "generate:api": "orval",
+    "openapi:fe:audit": "node tools/openapi_fe_audit.js audit",
+    "openapi:fe:fix": "node tools/openapi_fe_audit.js fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
