@@ -39,9 +39,13 @@ export function buildSchema(fields: FieldConfig[]) {
         break;
       }
       case "relation": {
-        schema = field.multiple
-          ? z.array(z.union([z.number(), z.string()])).min(1, "Seleziona almeno un valore")
-          : z.union([z.number(), z.string()]);
+        if (field.multiple) {
+          schema = field.required
+            ? z.array(z.union([z.number(), z.string()])).min(1, "Seleziona almeno un valore")
+            : z.array(z.union([z.number(), z.string()]));
+        } else {
+          schema = z.union([z.number(), z.string()]);
+        }
         break;
       }
       default: {

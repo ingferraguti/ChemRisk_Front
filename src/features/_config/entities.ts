@@ -1,37 +1,46 @@
 import type { EntityConfig, FieldOption } from "@/features/_crud/types";
 import {
-  deleteFrasihById,
-  deleteMiscelanonpericolosaById,
-  deleteProcessoById,
-  deleteSostanzaById,
-  deleteUserById,
-  deleteUsersById,
+  deleteAgentiChimiciId,
+  deleteFrasihId,
+  deleteMiscelanonpericolosaId,
+  deleteProcessoId,
+  deleteSostanzaId,
+  deleteUserId,
+  deleteUsersId,
   getFrasih,
-  getFrasihById,
+  getFrasihId,
+  getAgentiChimici,
+  getAgentiChimiciId,
   getMiscelanonpericolosa,
-  getMiscelanonpericolosaById,
-  getMiscelanonpericolosaFindByNome,
+  getMiscelanonpericolosaId,
+  getMiscelanonpericolosaFindByNomeKey,
   getProcesso,
-  getProcessoById,
-  getProcessoFindByNome,
+  getProcessoId,
+  getProcessoFindByNomeKey,
   getSostanza,
-  getSostanzaById,
+  getSostanzaId,
   getUser,
-  getUserById,
+  getUserId,
   getUsers,
-  getUsersById,
+  getUsersId,
+  patchAgentiChimiciId,
   postFrasih,
-  postFrasihById,
+  postFrasihId,
   postMiscelanonpericolosa,
-  postMiscelanonpericolosaById,
+  postMiscelanonpericolosaId,
   postProcesso,
-  postProcessoById,
+  postProcessoId,
   postSostanza,
-  postSostanzaById,
+  postSostanzaId,
   postUser,
-  postUserById,
+  postUserId,
   postUsers,
-  postUsersById,
+  postUsersId,
+  postAgentiChimici,
+  AgenteChimicoTipo,
+  type AgenteChimico,
+  type AgenteChimicoCreate,
+  type PatchAgentiChimiciIdBody,
   type FrasiH,
   type Miscelanonpericolosa,
   type Processo,
@@ -63,6 +72,7 @@ export const ENTITIES: Array<
   | EntityConfig<Sostanza[], Sostanza, Sostanza, Sostanza>
   | EntityConfig<Miscelanonpericolosa[], Miscelanonpericolosa, Miscelanonpericolosa, Miscelanonpericolosa>
   | EntityConfig<Processo[], Processo, Processo, Processo>
+  | EntityConfig<AgenteChimico[], AgenteChimico, AgenteChimicoCreate, PatchAgentiChimiciIdBody>
   | EntityConfig<UserWithRoles[], UserWithRoles, UserAdminCreate, UserAdminUpdate>
   | EntityConfig<UserBase[], UserBase, UserBase, UserBase>
 > = [
@@ -96,10 +106,10 @@ export const ENTITIES: Array<
     },
     api: {
       list: getFrasih,
-      get: getFrasihById,
+      get: getFrasihId,
       create: postFrasih,
-      update: postFrasihById,
-      remove: deleteFrasihById,
+      update: postFrasihId,
+      remove: deleteFrasihId,
     },
   },
   {
@@ -144,10 +154,10 @@ export const ENTITIES: Array<
     },
     api: {
       list: getSostanza,
-      get: getSostanzaById,
+      get: getSostanzaId,
       create: postSostanza,
-      update: postSostanzaById,
-      remove: deleteSostanzaById,
+      update: postSostanzaId,
+      remove: deleteSostanzaId,
     },
   },
   {
@@ -185,12 +195,12 @@ export const ENTITIES: Array<
     },
     api: {
       list: getMiscelanonpericolosa,
-      get: getMiscelanonpericolosaById,
+      get: getMiscelanonpericolosaId,
       create: postMiscelanonpericolosa,
-      update: postMiscelanonpericolosaById,
-      remove: deleteMiscelanonpericolosaById,
+      update: postMiscelanonpericolosaId,
+      remove: deleteMiscelanonpericolosaId,
     },
-    serverSearch: getMiscelanonpericolosaFindByNome,
+    serverSearch: getMiscelanonpericolosaFindByNomeKey,
   },
   {
     key: "processo",
@@ -227,12 +237,101 @@ export const ENTITIES: Array<
     },
     api: {
       list: getProcesso,
-      get: getProcessoById,
+      get: getProcessoId,
       create: postProcesso,
-      update: postProcessoById,
-      remove: deleteProcessoById,
+      update: postProcessoId,
+      remove: deleteProcessoId,
     },
-    serverSearch: getProcessoFindByNome,
+    serverSearch: getProcessoFindByNomeKey,
+  },
+  {
+    key: "agenti-chimici",
+    label: "Agenti chimici",
+    routes: { base: "/app/agenti-chimici" },
+    idField: "id",
+    list: {
+      enableSearch: true,
+      searchMode: "client",
+      columns: [
+        { key: "id", label: "ID" },
+        { key: "nome", label: "Nome" },
+        { key: "identificativo", label: "Identificativo" },
+        { key: "tipo", label: "Tipo" },
+        { key: "vlep", label: "VLEP" },
+        { key: "alta_emissione", label: "Alta emissione" },
+      ],
+    },
+    form: {
+      fields: [
+        { name: "nome", label: "Nome", type: "string", required: true },
+        {
+          name: "identificativo",
+          label: "Identificativo",
+          type: "string",
+          required: true,
+        },
+        {
+          name: "tipo",
+          label: "Tipo",
+          type: "enum",
+          required: true,
+          options: Object.values(AgenteChimicoTipo).map((value) => ({
+            label: value,
+            value,
+          })),
+        },
+        {
+          name: "vlep",
+          label: "VLEP",
+          type: "boolean",
+          required: true,
+        },
+        {
+          name: "alta_emissione",
+          label: "Alta emissione",
+          type: "boolean",
+          required: true,
+        },
+        {
+          name: "frasiHIds",
+          label: "Frasi H",
+          type: "relation",
+          multiple: true,
+          required: false,
+          loadOptions: frasiHOptions,
+          parse: (value) => {
+            if (Array.isArray(value) && value.length > 0) {
+              return value;
+            }
+            return undefined;
+          },
+        },
+        {
+          name: "sostanzeComponentiIds",
+          label: "Sostanze componenti",
+          type: "relation",
+          multiple: true,
+          required: false,
+          loadOptions: sostanzaOptions,
+          parse: (value) => {
+            if (Array.isArray(value) && value.length > 0) {
+              return value;
+            }
+            return undefined;
+          },
+        },
+      ],
+    },
+    api: {
+      list: getAgentiChimici,
+      get: getAgentiChimiciId,
+      create: postAgentiChimici,
+      update: patchAgentiChimiciId,
+      remove: async (id: number) => {
+        await deleteAgentiChimiciId(id);
+        return true;
+      },
+    },
   },
   {
     key: "usersAdmin",
@@ -252,9 +351,9 @@ export const ENTITIES: Array<
     },
     form: {
       fields: [
-        { name: "mail", label: "Email", type: "string", required: true },
-        { name: "name", label: "Nome", type: "string", required: true },
-        { name: "surname", label: "Cognome", type: "string", required: true },
+        { name: "mail", label: "Email", type: "string", required: false },
+        { name: "name", label: "Nome", type: "string", required: false },
+        { name: "surname", label: "Cognome", type: "string", required: false },
         { name: "username", label: "Username", type: "string", required: true, hideOnEdit: true },
         {
           name: "password",
@@ -277,15 +376,33 @@ export const ENTITIES: Array<
               .split(",")
               .map((role) => role.trim())
               .filter(Boolean),
+          hideOnEdit: true,
+        },
+        {
+          name: "roles",
+          label: "Ruoli",
+          type: "string",
+          required: false,
+          multiline: true,
+          placeholder: "ADMIN,USER",
+          description: "Inserisci i ruoli separati da virgola.",
+          parse: (value) => {
+            const parsed = String(value ?? "")
+              .split(",")
+              .map((role) => role.trim())
+              .filter(Boolean);
+            return parsed.length > 0 ? parsed : undefined;
+          },
+          hideOnCreate: true,
         },
       ],
     },
     api: {
       list: getUsers,
-      get: getUsersById,
+      get: getUsersId,
       create: postUsers,
-      update: postUsersById,
-      remove: deleteUsersById,
+      update: postUsersId,
+      remove: deleteUsersId,
     },
   },
   {
@@ -306,10 +423,10 @@ export const ENTITIES: Array<
     },
     form: {
       fields: [
-        { name: "mail", label: "Email", type: "string", required: true },
-        { name: "name", label: "Nome", type: "string", required: true },
-        { name: "surname", label: "Cognome", type: "string", required: true },
-        { name: "username", label: "Username", type: "string", required: true },
+        { name: "mail", label: "Email", type: "string", required: false },
+        { name: "name", label: "Nome", type: "string", required: false },
+        { name: "surname", label: "Cognome", type: "string", required: false },
+        { name: "username", label: "Username", type: "string", required: false },
         {
           name: "password",
           label: "Password",
@@ -321,10 +438,10 @@ export const ENTITIES: Array<
     },
     api: {
       list: getUser,
-      get: getUserById,
+      get: getUserId,
       create: postUser,
-      update: postUserById,
-      remove: deleteUserById,
+      update: postUserId,
+      remove: deleteUserId,
     },
   },
 ];
